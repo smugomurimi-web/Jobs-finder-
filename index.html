@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Finder</title>
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;color:#222}
+    header{background:#0f172a;color:#fff;padding:15px 40px;display:flex;justify-content:space-between;align-items:center}
+    header h1{margin:0;font-size:22px}
+    nav a{color:#fff;margin-left:20px;text-decoration:none;font-size:14px}
+    .hero{padding:60px 40px;background:#1e293b;color:#fff}
+    .hero h2{font-size:36px;margin-bottom:10px}
+    .search{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .search input{padding:12px;width:220px;border-radius:6px;border:none}
+    .search button{padding:12px 20px;border:none;border-radius:6px;background:#22c55e;color:#fff;cursor:pointer}
+    section{padding:50px 40px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+    .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.05)}
+    .card h3{margin-top:0}
+    .btn{background:#0f172a;color:#fff;padding:10px 15px;border:none;border-radius:6px;cursor:pointer}
+    .hidden{display:none}
+    footer{background:#020617;color:#fff;padding:20px;text-align:center}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>JobFinder</h1>
+  <nav>
+    <a href="#">Jobs</a>
+    <a href="#">Companies</a>
+    <a href="#">Post Job</a>
+    <a href="#" onclick="showLogin()">Login</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h2>Find Your Dream Job</h2>
+  <p>Search thousands of opportunities</p>
+  <div class="search">
+    <input id="searchTitle" placeholder="Job title" />
+    <input id="searchLocation" placeholder="Location" />
+    <button onclick="searchJobs()">Search</button>
+  </div>
+</div>
+
+<section>
+  <h2>Explore Jobs by Category</h2>
+  <div class="grid">
+    <div class="card">Technology</div>
+    <div class="card">Finance</div>
+    <div class="card">Healthcare</div>
+    <div class="card">Education</div>
+  </div>
+</section>
+
+<section>
+  <h2>Featured Jobs</h2>
+  <div id="jobs" class="grid"></div>
+</section>
+
+<section id="post" class="hidden">
+  <h2>Post a Job</h2>
+  <input id="jobTitle" placeholder="Job title" /><br><br>
+  <input id="jobLocation" placeholder="Location" /><br><br>
+  <button class="btn" onclick="postJob()">Post Job</button>
+</section>
+
+<div id="login" class="hidden">
+  <section>
+    <h2>Login / Register</h2>
+    <input id="email" placeholder="Email" /><br><br>
+    <input id="password" type="password" placeholder="Password" /><br><br>
+    <button class="btn" onclick="login()">Login</button>
+  </section>
+</div>
+
+<footer>
+  © 2026 JobFinder
+</footer>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  function showLogin(){document.getElementById('login').classList.remove('hidden')}
+
+  function login(){
+    auth.signInWithEmailAndPassword(email.value,password.value)
+    .catch(()=>auth.createUserWithEmailAndPassword(email.value,password.value))
+    .then(()=>{document.getElementById('login').classList.add('hidden');document.getElementById('post').classList.remove('hidden')});
+  }
+
+  function postJob(){
+    db.collection('jobs').add({title:jobTitle.value,location:jobLocation.value});
+  }
+
+  function loadJobs(){
+    db.collection('jobs').onSnapshot(s=>{
+      jobs.innerHTML='';
+      s.forEach(d=>{
+        const j=d.data();
+        jobs.innerHTML+=`<div class="card"><h3>${j.title}</h3><p>${j.location}</p></div>`;
+      })
+    })
+  }
+
+  function searchJobs(){loadJobs()}
+  loadJobs();
+</script>
+
+</body>
+</html>
